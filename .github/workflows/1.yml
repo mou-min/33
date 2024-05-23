@@ -41,10 +41,10 @@ jobs:
           mkdir -p "Release_${release_tag}"
           cd "Release_${release_tag}"
           assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-          echo "$assets" | while IFS= read -r item; do
-            name=$(echo "$item" | cut -d' ' -f1)
-            url=$(echo "$item" | cut -d' ' -f2)
-            wget -O "$name" -q "$url"
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
           done
 
       - name: Download v2rayN assets (pre-release)
@@ -54,11 +54,11 @@ jobs:
           cd Archive/v2rayn
           mkdir -p "PreRelease_${prerelease_tag}"
           cd "PreRelease_${prerelease_tag}"
-          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + \" \" + .browser_download_url')
-          echo "$assets" | while IFS= read -r item; do
-            name=$(echo "$item" | cut -d' ' -f1)
-            url=$(echo "$item" | cut -d' ' -f2)
-            wget -O "$name" -q "$url"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
           done
 
       - name: Download v2rayNG assets (release)
@@ -69,10 +69,10 @@ jobs:
           mkdir -p "Release_${release_tag}"
           cd "Release_${release_tag}"
           assets=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-          echo "$assets" | while IFS= read -r item; do
-            name=$(echo "$item" | cut -d' ' -f1)
-            url=$(echo "$item" | cut -d' ' -f2)
-            wget -O "$name" -q "$url"
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
           done
 
       - name: Download v2rayNG assets (pre-release)
@@ -82,11 +82,11 @@ jobs:
           cd Archive/v2rayng
           mkdir -p "PreRelease_${prerelease_tag}"
           cd "PreRelease_${prerelease_tag}"
-          assets=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + \" \" + .browser_download_url')
-          echo "$assets" | while IFS= read -r item; do
-            name=$(echo "$item" | cut -d' ' -f1)
-            url=$(echo "$item" | cut -d' ' -f2)
-            wget -O "$name" -q "$url"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
           done
 
       - name: Install Git LFS
