@@ -44,6 +44,7 @@ jobs:
           for item in $urls; do
             name=$(echo $item | cut -d' ' -f1)
             wget -O "$name" -q $item
+            echo $name $item
           done
 
       - name: Download v2rayNG assets
@@ -57,6 +58,7 @@ jobs:
           for item in $urls; do
             name=$(echo $item | cut -d' ' -f1)
             wget -O "$name" -q $item
+            echo $name $item
           done
 
       - name: Install Git LFS
