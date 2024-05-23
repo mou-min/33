@@ -43,7 +43,9 @@ jobs:
           urls=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
           for item in $urls; do
             name=$(echo $item | cut -d' ' -f1)
+            echo $name
             url=$(echo $item | cut -d' ' -f2)
+            echo $url
             wget -O "$name" -q $url
           done
 
