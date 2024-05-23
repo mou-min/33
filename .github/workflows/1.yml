@@ -23,16 +23,6 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y aria2 jq
 
-      - name: Download and setup 7zip
-        run: |
-          mkdir -p Archive/7zip
-          cd Archive/7zip
-          wget "https://www.7-zip.org/a/7z2301-linux-x64.tar.xz" -O 7zip.tar.xz
-          tar -xf 7zip.tar.xz
-          mv 7zz ..
-          cd ..
-          rm -rf 7zip && chmod +x 7zz
-
       - name: Download v2rayN assets
         run: |
           mkdir -p Archive/v2rayn
@@ -44,7 +34,8 @@ jobs:
           for item in $urls; do
               name=$(echo $item | cut -d' ' -f1)
               url=$(echo $item | cut -d' ' -f2)
-              wget -O "$name" -q $url
+              wget -O "$name" -q "$url"
+              echo  "$name" "$url"
           done
 
       - name: Download v2rayNG assets
