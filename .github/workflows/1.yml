@@ -23,39 +23,28 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y aria2 jq
 
-      - name: Download v2rayN assets (release)
+      - name: Download all v2rayN releases assets
         run: |
-          release_info=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest)
-          release_tag=$(echo "$release_info" | jq -r ".tag_name")
-          if [ -n "$release_tag" ]; then
-            mkdir -p "Archive/v2rayN/Release_${release_tag}"
-            cd "Archive/v2rayN/Release_${release_tag}"
-            assets=$(echo "$release_info" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          mkdir -p Archive/v2rayN
+          releases=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases)
+          echo "$releases" | jq -c '.[]' | while IFS= read -r release; do
+            tag_name=$(echo "$release" | jq -r ".tag_name")
+            prerelease=$(echo "$release" | jq -r ".prerelease")
+            if [ "$prerelease" == "true" ]; then
+              dir="PreRelease_${tag_name}"
+            else
+              dir="Release_${tag_name}"
+            fi
+            mkdir -p "Archive/v2rayN/$dir"
+            cd "Archive/v2rayN/$dir"
+            assets=$(echo "$release" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
             echo "$assets" | while IFS= read -r line; do
               name=$(echo "$line" | cut -d' ' -f1)
               url=$(echo "$line" | cut -d' ' -f2)
               wget -O "$name" "$url"
             done
-          else
-            echo "No release found for v2rayN"
-          fi
-
-      - name: Download v2rayN assets (pre-release)
-        run: |
-          prerelease_info=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0]')
-          prerelease_tag=$(echo "$prerelease_info" | jq -r ".tag_name")
-          if [ -n "$prerelease_tag" ]; then
-            mkdir -p "Archive/v2rayN/PreRelease_${prerelease_tag}"
-            cd "Archive/v2rayN/PreRelease_${prerelease_tag}"
-            assets=$(echo "$prerelease_info" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-            echo "$assets" | while IFS= read -r line; do
-              name=$(echo "$line" | cut -d' ' -f1)
-              url=$(echo "$line" | cut -d' ' -f2)
-              wget -O "$name" "$url"
-            done
-          else
-            echo "No pre-release found for v2rayN"
-          fi
+            cd -
+          done
 
       - name: Install Git LFS
         run: |
