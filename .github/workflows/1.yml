@@ -48,8 +48,8 @@ jobs:
       - name: Download v2rayN assets (pre-release)
         run: |
           prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
-          mkdir -p "Archive/v2rayn/PreRelease_${prerelease_tag}"
-          cd "Archive/v2rayn/PreRelease_${prerelease_tag}"
+          mkdir -p "Archive/v2rayN/PreRelease_${prerelease_tag}"
+          cd "Archive/v2rayN/PreRelease_${prerelease_tag}"
           assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
           echo "$assets" | while IFS= read -r line; do
             name=$(echo "$line" | cut -d' ' -f1)
