@@ -42,9 +42,9 @@ jobs:
           cd "Release_${release_tag}"
           urls=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
           for item in $urls; do
-          name=$(echo $item | cut -d' ' -f1)
-          url=$(echo $item | cut -d' ' -f2)
-          wget -O "$name" -q $url
+              name=$(echo $item | cut -d' ' -f1)
+              url=$(echo $item | cut -d' ' -f2)
+              wget -O "$name" -q $url
           done
 
       - name: Download v2rayNG assets
@@ -56,9 +56,9 @@ jobs:
           cd "Release_${release_tag}"
           urls=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
           for item in $urls; do
-          name=$(echo $item | cut -d' ' -f1)
-          url=$(echo $item | cut -d' ' -f2)
-          wget -O "$name" -q $url
+              name=$(echo $item | cut -d' ' -f1)
+              url=$(echo $item | cut -d' ' -f2)
+              wget -O "$name" -q $url
           done
 
       - name: Install Git LFS
