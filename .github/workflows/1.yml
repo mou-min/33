@@ -23,33 +23,70 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y aria2 jq
 
-      - name: Download v2rayN assets
+      - name: Download and setup 7zip
+        run: |
+          mkdir -p Archive/7zip
+          cd Archive/7zip
+          wget "https://www.7-zip.org/a/7z2301-linux-x64.tar.xz" -O 7zip.tar.xz
+          tar -xf 7zip.tar.xz
+          mv 7zz ..
+          cd ..
+          rm -rf 7zip && chmod +x 7zz
+
+      - name: Download v2rayN assets (release)
         run: |
           mkdir -p Archive/v2rayn
-          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r ".[0].tag_name")
+          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".tag_name")
           cd Archive/v2rayn
           mkdir -p "Release_${release_tag}"
           cd "Release_${release_tag}"
-          urls=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-          for item in $urls; do
-              name=$(echo $item | cut -d' ' -f1)
-              url=$(echo $item | cut -d' ' -f2)
-              wget -O "$name" -q "$url"
-              echo  "$name" "$url"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          echo "$assets" | while IFS= read -r item; do
+            name=$(echo "$item" | cut -d' ' -f1)
+            url=$(echo "$item" | cut -d' ' -f2)
+            wget -O "$name" -q "$url"
           done
 
-      - name: Download v2rayNG assets
+      - name: Download v2rayN assets (pre-release)
+        run: |
+          mkdir -p Archive/v2rayn
+          prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
+          cd Archive/v2rayn
+          mkdir -p "PreRelease_${prerelease_tag}"
+          cd "PreRelease_${prerelease_tag}"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + \" \" + .browser_download_url')
+          echo "$assets" | while IFS= read -r item; do
+            name=$(echo "$item" | cut -d' ' -f1)
+            url=$(echo "$item" | cut -d' ' -f2)
+            wget -O "$name" -q "$url"
+          done
+
+      - name: Download v2rayNG assets (release)
         run: |
           mkdir -p Archive/v2rayng
-          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r ".[0].tag_name")
+          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".tag_name")
           cd Archive/v2rayng
           mkdir -p "Release_${release_tag}"
           cd "Release_${release_tag}"
-          urls=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-          for item in $urls; do
-              name=$(echo $item | cut -d' ' -f1)
-              url=$(echo $item | cut -d' ' -f2)
-              wget -O "$name" -q $url
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          echo "$assets" | while IFS= read -r item; do
+            name=$(echo "$item" | cut -d' ' -f1)
+            url=$(echo "$item" | cut -d' ' -f2)
+            wget -O "$name" -q "$url"
+          done
+
+      - name: Download v2rayNG assets (pre-release)
+        run: |
+          mkdir -p Archive/v2rayng
+          prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
+          cd Archive/v2rayng
+          mkdir -p "PreRelease_${prerelease_tag}"
+          cd "PreRelease_${prerelease_tag}"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + \" \" + .browser_download_url')
+          echo "$assets" | while IFS= read -r item; do
+            name=$(echo "$item" | cut -d' ' -f1)
+            url=$(echo "$item" | cut -d' ' -f2)
+            wget -O "$name" -q "$url"
           done
 
       - name: Install Git LFS
