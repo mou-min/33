@@ -25,28 +25,38 @@ jobs:
 
       - name: Download v2rayN assets (release)
         run: |
-          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".tag_name")
-          mkdir -p "Archive/v2rayN/Release_${release_tag}"
-          cd "Archive/v2rayN/Release_${release_tag}"
-          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-          echo "$assets" | while IFS= read -r line; do
-            name=$(echo "$line" | cut -d' ' -f1)
-            url=$(echo "$line" | cut -d' ' -f2)
-            wget -O "$name" "$url"
-          done
+          release_info=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest)
+          release_tag=$(echo "$release_info" | jq -r ".tag_name")
+          if [ -n "$release_tag" ]; then
+            mkdir -p "Archive/v2rayN/Release_${release_tag}"
+            cd "Archive/v2rayN/Release_${release_tag}"
+            assets=$(echo "$release_info" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+            echo "$assets" | while IFS= read -r line; do
+              name=$(echo "$line" | cut -d' ' -f1)
+              url=$(echo "$line" | cut -d' ' -f2)
+              wget -O "$name" "$url"
+            done
+          else
+            echo "No release found for v2rayN"
+          fi
 
       - name: Download v2rayN assets (pre-release)
         run: |
-          prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
-          mkdir -p "Archive/v2rayN/PreRelease_${prerelease_tag}"
-          cd "Archive/v2rayN/PreRelease_${prerelease_tag}"
-          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
-          echo "$assets" | while IFS= read -r line; do
-            name=$(echo "$line" | cut -d' ' -f1)
-            url=$(echo "$line" | cut -d' ' -f2)
-            wget -O "$name" "$url"
-          done
-          
+          prerelease_info=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0]')
+          prerelease_tag=$(echo "$prerelease_info" | jq -r ".tag_name")
+          if [ -n "$prerelease_tag" ]; then
+            mkdir -p "Archive/v2rayN/PreRelease_${prerelease_tag}"
+            cd "Archive/v2rayN/PreRelease_${prerelease_tag}"
+            assets=$(echo "$prerelease_info" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+            echo "$assets" | while IFS= read -r line; do
+              name=$(echo "$line" | cut -d' ' -f1)
+              url=$(echo "$line" | cut -d' ' -f2)
+              wget -O "$name" "$url"
+            done
+          else
+            echo "No pre-release found for v2rayN"
+          fi
+
       - name: Install Git LFS
         run: |
           curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
