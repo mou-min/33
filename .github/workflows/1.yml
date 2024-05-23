@@ -35,11 +35,9 @@ jobs:
 
       - name: Download v2rayN assets (release)
         run: |
-          mkdir -p Archive/v2rayn
           release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".tag_name")
-          cd Archive/v2rayn
-          mkdir -p "Release_${release_tag}"
-          cd "Release_${release_tag}"
+          mkdir -p "Archive/v2rayN/Release_${release_tag}"
+          cd "Archive/v2rayN/Release_${release_tag}"
           assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
           echo "$assets" | while IFS= read -r line; do
             name=$(echo "$line" | cut -d' ' -f1)
@@ -49,11 +47,9 @@ jobs:
 
       - name: Download v2rayN assets (pre-release)
         run: |
-          mkdir -p Archive/v2rayn
           prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
-          cd Archive/v2rayn
-          mkdir -p "PreRelease_${prerelease_tag}"
-          cd "PreRelease_${prerelease_tag}"
+          mkdir -p "Archive/v2rayn/PreRelease_${prerelease_tag}"
+          cd "Archive/v2rayn/PreRelease_${prerelease_tag}"
           assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
           echo "$assets" | while IFS= read -r line; do
             name=$(echo "$line" | cut -d' ' -f1)
