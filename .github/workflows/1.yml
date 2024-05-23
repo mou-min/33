@@ -35,15 +35,31 @@ jobs:
 
       - name: Download v2rayN assets
         run: |
-          mkdir -p Archive/v2rayn/Clients
-          cd Archive/v2rayn/Clients
-          wget -qO- https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[].browser_download_url" | xargs -n 1 -P 8 aria2c -x 16 -s 16
+          mkdir -p Archive/v2rayn
+          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r ".[0].tag_name")
+          cd Archive/v2rayn
+          mkdir -p "Release_${release_tag}"
+          cd "Release_${release_tag}"
+          urls=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          for item in $urls; do
+            name=$(echo $item | cut -d' ' -f1)
+            url=$(echo $item | cut -d' ' -f2)
+            wget -O "$name" -q $url
+          done
 
       - name: Download v2rayNG assets
         run: |
-          mkdir -p Archive/v2rayng/Clients
-          cd Archive/v2rayng/Clients
-          wget -qO- https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[].browser_download_url" | xargs -n 1 -P 8 aria2c -x 16 -s 16
+          mkdir -p Archive/v2rayng
+          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases | jq -r ".[0].tag_name")
+          cd Archive/v2rayng
+          mkdir -p "Release_${release_tag}"
+          cd "Release_${release_tag}"
+          urls=$(curl -s https://api.github.com/repos/2dust/v2rayNG/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          for item in $urls; do
+            name=$(echo $item | cut -d' ' -f1)
+            url=$(echo $item | cut -d' ' -f2)
+            wget -O "$name" -q $url
+          done
 
       - name: Install Git LFS
         run: |
@@ -84,6 +100,7 @@ jobs:
             git pull --rebase origin main
             git stash pop
             git add Archive/
+            git add .gitattributes
             git commit -m "更新时间：${{ env.current_time }}"
             git push origin main
           fi
