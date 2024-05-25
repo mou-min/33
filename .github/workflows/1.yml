@@ -19,44 +19,50 @@ jobs:
         run: |
           current_time=$(TZ="Asia/Shanghai" date +"%Y-%m-%d %H:%M:%S")
           echo "current_time=${current_time}" >> $GITHUB_ENV
-
       - name: Install dependencies
         run: sudo apt-get install -y aria2 jq
 
-      - name: Download all v2rayN releases assets
+      - name: Download and setup 7zip
         run: |
-          mkdir -p Archive/v2rayN
-          releases=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases)
-          echo "$releases" | jq -c '.[]' | while IFS= read -r release; do
-            tag_name=$(echo "$release" | jq -r ".tag_name")
-            prerelease=$(echo "$release" | jq -r ".prerelease")
-            if [ "$prerelease" == "true" ]; then
-              dir="PreRelease_${tag_name}"
-            else
-              dir="Release_${tag_name}"
-            fi
-            mkdir -p "Archive/v2rayN/$dir"
-            cd "Archive/v2rayN/$dir"
-            assets=$(echo "$release" | jq -r ".assets[] | .name + \" \" + .browser_download_url")
-            echo "$assets" | while IFS= read -r line; do
-              name=$(echo "$line" | cut -d' ' -f1)
-              url=$(echo "$line" | cut -d' ' -f2)
-              wget -O "$name" "$url"
-            done
-            cd -
+          mkdir -p Archive/7zip
+          cd Archive/7zip
+          wget "https://www.7-zip.org/a/7z2301-linux-x64.tar.xz" -O 7zip.tar.xz
+          tar -xf 7zip.tar.xz
+          mv 7zz ..
+          cd ..
+          rm -rf 7zip && chmod +x 7zz
+      - name: Download v2rayN assets (release)
+        run: |
+          release_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".tag_name")
+          mkdir -p "Archive/v2rayN/Release_${release_tag}"
+          cd "Archive/v2rayN/Release_${release_tag}"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases/latest | jq -r ".assets[] | .name + \" \" + .browser_download_url")
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
           done
-
+      - name: Download v2rayN assets (pre-release)
+        run: |
+          prerelease_tag=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].tag_name')
+          mkdir -p "Archive/v2rayN/PreRelease_${prerelease_tag}"
+          cd "Archive/v2rayN/PreRelease_${prerelease_tag}"
+          assets=$(curl -s https://api.github.com/repos/2dust/v2rayN/releases | jq -r '[.[] | select(.prerelease == true)][0].assets[] | .name + " " + .browser_download_url')
+          echo "$assets" | while IFS= read -r line; do
+            name=$(echo "$line" | cut -d' ' -f1)
+            url=$(echo "$line" | cut -d' ' -f2)
+            wget -O "$name" "$url"
+          done
+          
       - name: Install Git LFS
         run: |
           curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
           sudo apt-get install git-lfs
           git lfs install
-
       - name: Configure Git user
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-
       - name: Track large files with Git LFS
         env:
           current_time: ${{ env.current_time }}
@@ -70,7 +76,6 @@ jobs:
           else
             git commit -m "更新时间：${{ env.current_time }}"
           fi
-
       - name: Commit and push changes
         env:
           current_time: ${{ env.current_time }}
@@ -89,4 +94,3 @@ jobs:
             git commit -m "更新时间：${{ env.current_time }}"
             git push origin main
           fi
- 
